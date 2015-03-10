@@ -4,6 +4,8 @@
     "dependencies": {
         "webpack": "1.5.x",
         "opentype.js": "0.4.x",
+        "jsx-loader": "0.12.x",
+        "worker-loader": "0.5.x",
         "react": "0.12.x"
     }
 }

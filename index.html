@@ -2,245 +2,34 @@
 <html>
 <head>
     <title>Font Builder</title>
-    <script src="opentype.min.js"></script>
     <style type="text/css">
         body {
-            background-color: #000;
+            background-color: #fff;
+        }
+
+        .font-canvas {
+            overflow: hidden;
+            height: 1px;
+            width: 1px;
         }
     </style>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
 </head>
 <body>
-<canvas id="font-canvas"></canvas>
+
+<div class="container">
+    <div id="content"></div>
+</div>
+
+<script src="/build/bundle.js"></script>
+
+<!-- <canvas id="font-canvas"></canvas> -->
+<!--
 <script type="text/javascript">
 /*jslint browser: true */
 /*global opentype, ImageData */
 'use strict';
 
-var PIXEL_RATIO = window.devicePixelRatio || 1;
-var DEBUG = true;
-
-var canvas = document.getElementById('font-canvas');
-var ctx = canvas.getContext('2d');
-
-
-function build_spiral(radius) {
-    /*
-        Precalculate the spread of pixels and their distances.
-        It's a lot cheaper than doing distance from centerX -> offsetX for every pixel.
-        Also, we can sort the spiral by distance so if we find a match, we can exit early.
-    */
-    var spiral = [],
-        level = 0,
-        op = 1,
-        x = 0,
-        y = 0;
-
-    while (true) {
-        if (op === 2) {
-            x += 1;
-
-            if (x === level) {
-                op = 3;
-            }
-        } else if (op === 3) {
-            y -= 1;
-
-            if (y === -level) {
-                op = 4;
-            }
-        } else if (op === 4) {
-            x -= 1;
-
-            if (x === -level) {
-                op = 1;
-            }
-        } else if (op === 1) {
-            y += 1;
-
-            if (y === level + 1) {
-                level += 1;
-
-                if (level > radius) {
-                    break;
-                }
-
-                op = 2;
-            }
-        }
-
-        spiral.push([x, y, Math.sqrt(x * x + y * y)]);
-    }
-
-    return spiral.sort(function (a, b) {
-        if (a[2] < b[2]) {
-            return -1;
-        }
-
-        if (a[2] > b[2]) {
-            return 1;
-        }
-
-        return 0;
-    });
-}
-
-function generateFontMap(fontPath, fontSize, spread, imgSize, offset, callback) {
-    canvas.width = imgSize;
-    canvas.height = imgSize;
-    ctx.imageSmoothingEnabled = false;
-
-    opentype.load(fontPath, function (err, font) {
-        console.log('Font');
-        if (err) {
-            console.log(err);
-        } else {
-            var path = null,
-                glyph = null,
-                img = null,
-                scale = fontSize / font.unitsPerEm,
-                i = offset,
-                x = 0,
-                y = 0,
-                boundary = null,
-                boundaries = [],
-                yMax = 0;
-
-
-            while (i < font.glyphs.length) {
-                glyph = font.glyphs[i];
-
-                if (x + 2 * spread + (glyph.xMax - glyph.xMin) * scale > canvas.width) {
-                    x = 0;
-                    y += yMax + 2 * spread;
-                    yMax = 0;
-                }
-
-                if (y + 2 * spread + (glyph.yMax - glyph.yMin) * scale > canvas.height) {
-                    x = 0;
-                    y = 0;
-                    yMax = 0;
-                    break;
-                }
-
-                boundary = {
-                    left: x,
-                    right: x + (glyph.xMax - glyph.xMin) * scale + 2 * spread,
-                    top: y,
-                    bottom: y + (glyph.yMax  - glyph.yMin) * scale + spread * 2,
-                    xOffset: glyph.xMin * scale,
-                    yOffset: glyph.yMin * scale,
-                    advanceWidth: glyph.advanceWidth * scale,
-                };
-
-                boundaries.push(boundary);
-
-                path = glyph.getPath(spread + x - glyph.xMin * scale, spread + y + glyph.yMax * scale, fontSize);
-                x += (glyph.xMax - glyph.xMin) * scale + 2 * spread;
-
-                if ((glyph.yMax - glyph.yMin) * scale > yMax) {
-                    yMax = (glyph.yMax - glyph.yMin) * scale;
-                }
-
-                path.draw(ctx);
-
-                i += 1;
-            }
-
-            img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            callback(img, boundaries, i);
-        }
-    });
-}
-
-function setImage(img, x, y, distance, spread) {
-    var offset = (y * img.width + x) * 4,
-        alpha = 0.5 + 0.5 * (distance / spread);
-
-    if (DEBUG) {
-        if (y !== Math.floor(y) || x !== Math.floor(x)) {
-            throw ('setImage not sending integers');
-        }
-    }
-
-    alpha = Math.min(1, Math.max(0, alpha));
-
-    img.data[offset]     = alpha * 255;
-    img.data[offset + 1] = alpha * 255;
-    img.data[offset + 2] = alpha * 255;
-    img.data[offset + 3] = alpha * 255;
-
-
-}
-
-function getImage(img, x, y) {
-    var offset = (y * img.width + x) * 4;
-
-    if (DEBUG) {
-        if (y !== Math.floor(y) || x !== Math.floor(x)) {
-            throw ('setImage not sending integers');
-        }
-    }
-
-    if (img.data[offset + 3] < 127) {
-        return false;
-    }
-
-    return true;
-
-}
-
-function findSignedDistance(img, centerX, centerY, spread, spiral) {
-    var startX = Math.max(0, centerX - spread),
-        endX = Math.min(img.width - 1, centerX + spread),
-        startY = Math.max(0, centerY - spread),
-        endY = Math.min(img.height - 1, centerY + spread),
-        closest = spread,
-        base = getImage(img, Math.floor(centerX), Math.floor(centerY)),
-        i = 0,
-        x = 0,
-        y = 0;
-
-    for (i = 0; i < spiral.length; i += 1) {
-        x = Math.floor(spiral[i][0] + centerX);
-        y = Math.floor(spiral[i][1] + centerY);
-        if (!(x < startX || x > endX || y < startY || y > endY)) {
-            if (getImage(img, x, y) !== base) {
-                closest = spiral[i][2];
-                break;
-            }
-        }
-    }
-
-    if (base === true) {
-        return Math.min(closest, spread);
-    }
-
-    return Math.min(closest, spread) * -1;
-}
-
-function generateSignedDistanceField(img, outSize, spread) {
-    var downscale = img.width / outSize,
-        outImage = new ImageData(outSize, outSize),
-        outSpread = Math.ceil(spread / downscale),
-        x = 0,
-        y = 0,
-        distance = 0,
-        adjustedX = 0,
-        adjustedY = 0,
-        spiral = build_spiral(outSpread);
-
-    for (y = 0; y < outSize; y += 1) {
-        for (x = 0; x < outSize; x += 1) {
-            adjustedX = (x * downscale) + downscale / 2;
-            adjustedY = (y * downscale) + downscale / 2;
-
-            distance = findSignedDistance(img, adjustedX, adjustedY, spread, spiral);
-            setImage(outImage, x, y, distance, outSpread);
-        }
-    }
-
-    return outImage;
-}
 
 function buildFont(fontPath, fontSize, spread, inSize, outSize, callback) {
     generateFontMap(fontPath, fontSize, spread, inSize, 0, function (image, boundaries, offset) {
@@ -263,5 +52,6 @@ buildFont('Roboto-Regular.ttf', 64, 20, 1024, 1024);
 console.log('loading font');
 
 </script>
+-->
 </body>
 </html>
