@@ -23,7 +23,7 @@ module.exports = React.createClass({
         // TODO: Move a lot of this processing to worker.
         font_map.generateFontMap(
             ctx,
-            this.props.fontPath,
+            this.props.fontData,
             this.props.fontSize,
             this.props.spread,
             this.props.inSize,
