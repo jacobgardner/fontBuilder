@@ -5,7 +5,7 @@
     <script src="opentype.min.js"></script>
     <style type="text/css">
         body {
-            background-color: #333333;
+            background-color: #ccc;
         }
     </style>
 </head>
@@ -81,6 +81,7 @@ function build_spiral(radius) {
 function generateFontMap(fontPath, fontSize, spread, imgSize, offset, callback) {
     canvas.width = imgSize;
     canvas.height = imgSize;
+    ctx.imageSmoothingEnabled = false;
 
     opentype.load(fontPath, function (err, font) {
         console.log('Font');
@@ -94,6 +95,8 @@ function generateFontMap(fontPath, fontSize, spread, imgSize, offset, callback) 
                 i = offset,
                 x = 0,
                 y = 0,
+                boundary = null,
+                boundaries = [],
                 yMax = 0;
 
 
@@ -113,7 +116,18 @@ function generateFontMap(fontPath, fontSize, spread, imgSize, offset, callback) 
                     break;
                 }
 
-                path = glyph.getPath(spread + x - glyph.xMin * scale, spread + y + glyph.yMax * scale, 64);
+                boundary = {
+                    left: x,
+                    right: x + (glyph.xMax - glyph.xMin) * scale + 2 * spread,
+                    top: y,
+                    bottom: y + (glyph.yMax  - glyph.yMin) * scale + spread * 2,
+                };
+
+                boundaries.push(boundary);
+
+
+
+                path = glyph.getPath(spread + x - glyph.xMin * scale, spread + y + glyph.yMax * scale, fontSize);
                 x += (glyph.xMax - glyph.xMin) * scale + 2 * spread;
 
                 if ((glyph.yMax - glyph.yMin) * scale > yMax) {
@@ -126,7 +140,7 @@ function generateFontMap(fontPath, fontSize, spread, imgSize, offset, callback) 
             }
 
             img = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            callback(img, i);
+            callback(img, boundaries, i);
         }
     });
 }
@@ -162,7 +176,7 @@ function findSignedDistance(img, centerX, centerY, spread, spiral) {
         startY = Math.max(0, centerY - spread),
         endY = Math.min(img.height - 1, centerY + spread),
         closest = spread,
-        base = getImage(img, centerX, centerY),
+        base = getImage(img, Math.floor(centerX), Math.floor(centerY)),
         i = 0,
         x = 0,
         y = 0;
@@ -209,16 +223,23 @@ function generateSignedDistanceField(img, outSize, spread) {
     return outImage;
 }
 
-var FONT_SIZE = 128;
+function buildFont(fontPath, fontSize, spread, inSize, outSize, callback) {
+    generateFontMap(fontPath, fontSize, spread, inSize, 0, function (image, boundaries, offset) {
+        var dField = generateSignedDistanceField(image, outSize, spread - 1);
+        canvas.width = outSize;
+        canvas.height = outSize;
+        ctx.putImageData(dField, 0, 0);
 
-generateFontMap('Roboto-Regular.ttf', FONT_SIZE, 10, 1024, 0, function (image, offset) {
-    var dField = generateSignedDistanceField(image, 1024, 15);
-    canvas.width = 1024;
-    canvas.height = 1024;
-    ctx.putImageData(dField, 0, 0);
-    console.log("generated");
-});
+        for (var i = 0; i < boundaries.length; i += 1) {
+            var boundary = boundaries[i];
+            ctx.rect(boundary.left, boundary.top, boundary.right - boundary.left, boundary.bottom - boundary.top);
+            ctx.stroke();
+        }
 
+    });
+}
+
+buildFont('Roboto-Regular.ttf', 32, 12, 512, 512);
 
 console.log('loading font');
 
