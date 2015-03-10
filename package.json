@@ -1,0 +1,9 @@
+{
+    "name": "HTMLFontBuilder",
+    "description": "Font Builder",
+    "dependencies": {
+        "webpack": "1.5.x",
+        "opentype.js": "0.4.x",
+        "react": "0.12.x"
+    }
+}

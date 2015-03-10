@@ -5,7 +5,7 @@
     <script src="opentype.min.js"></script>
     <style type="text/css">
         body {
-            background-color: #ccc;
+            background-color: #000;
         }
     </style>
 </head>
@@ -24,6 +24,11 @@ var ctx = canvas.getContext('2d');
 
 
 function build_spiral(radius) {
+    /*
+        Precalculate the spread of pixels and their distances.
+        It's a lot cheaper than doing distance from centerX -> offsetX for every pixel.
+        Also, we can sort the spiral by distance so if we find a match, we can exit early.
+    */
     var spiral = [],
         level = 0,
         op = 1,
@@ -122,11 +127,12 @@ function generateFontMap(fontPath, fontSize, spread, imgSize, offset, callback) 
                     right: x + (glyph.xMax - glyph.xMin) * scale + 2 * spread,
                     top: y,
                     bottom: y + (glyph.yMax  - glyph.yMin) * scale + spread * 2,
+                    xOffset: glyph.xMin * scale,
+                    yOffset: glyph.yMin * scale,
+                    advanceWidth: glyph.advanceWidth * scale,
                 };
 
                 boundaries.push(boundary);
-
-
 
                 path = glyph.getPath(spread + x - glyph.xMin * scale, spread + y + glyph.yMax * scale, fontSize);
                 x += (glyph.xMax - glyph.xMin) * scale + 2 * spread;
@@ -243,16 +249,16 @@ function buildFont(fontPath, fontSize, spread, inSize, outSize, callback) {
         canvas.height = outSize;
         ctx.putImageData(dField, 0, 0);
 
-        for (var i = 0; i < boundaries.length; i += 1) {
-            var boundary = boundaries[i];
-            ctx.rect(boundary.left, boundary.top, boundary.right - boundary.left, boundary.bottom - boundary.top);
-            ctx.stroke();
-        }
+        // for (var i = 0; i < boundaries.length; i += 1) {
+        //     var boundary = boundaries[i];
+        //     ctx.rect(boundary.left, boundary.top, boundary.right - boundary.left, boundary.bottom - boundary.top);
+        //     ctx.stroke();
+        // }
 
     });
 }
 
-buildFont('Roboto-Regular.ttf', 32, 12, 512, 512);
+buildFont('Roboto-Regular.ttf', 64, 20, 1024, 1024);
 
 console.log('loading font');
 
