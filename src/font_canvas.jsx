@@ -71,8 +71,8 @@ module.exports = React.createClass({
                 <div className="font-canvas">
                     <canvas ref="font_canvas"></canvas>
                 </div>
-                <img ref="font_img" width={250} />
-                <img ref="dfield_img" width={250} />
+                <img ref="font_img" width="50%" />
+                <img ref="dfield_img" width="50%" />
             </div>
         );
     }
