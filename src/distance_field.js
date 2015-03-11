@@ -13,7 +13,7 @@ function getImage(img, x, y) {
         }
     }
 
-    if (img.data[offset + 3] < 127) {
+    if (img.data[offset + 3] < 1) {
         return false;
     }
 
@@ -64,9 +64,9 @@ function setImage(img, x, y, distance, spread) {
 
     alpha = Math.min(1, Math.max(0, alpha));
 
-    img.data[offset]     = alpha * 255;
-    img.data[offset + 1] = alpha * 255;
-    img.data[offset + 2] = alpha * 255;
+    img.data[offset]     = 255;
+    img.data[offset + 1] = 255;
+    img.data[offset + 2] = 255;
     img.data[offset + 3] = alpha * 255;
 
 

@@ -69,7 +69,7 @@ module.exports = React.createClass({
                     dField.postMessage({
                         image: image,
                         outSize: self.props.outSize,
-                        spread: self.props.spread - 1,
+                        spread: self.props.spread,
                     });
 
                     dField.onmessage = function (e) {

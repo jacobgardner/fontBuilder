@@ -6,6 +6,8 @@ varying vec2 texCoord;
 
 void main(void) {
     vec4 color;
+    float mask;
+    float alpha;
     // vec2 normalized = texCoord - 0.5;
     // vec2 norm = normalize(normalized);
     // float radius = 0.46;
@@ -35,11 +37,17 @@ void main(void) {
 
 
     if (use_dfield) {
-        if (texture2D(dfieldTexture, texCoord).a > 0.5) {
-            color = vec4(1.0, 1.0, 1.0, 1.0);
+        mask = texture2D(dfieldTexture, texCoord).a;
+
+        if (mask < 0.5) {
+            alpha = 0.0;
         } else {
-            color = vec4(0.0, 0.0, 0.0, 0.0);
+            alpha = 1.0;
         }
+
+        alpha *= smoothstep(0.25, 0.75, mask);
+
+        color = vec4(1.0, 1.0, 1.0, alpha);
 
         gl_FragColor = color;
     } else {
