@@ -116,7 +116,7 @@ function GLExample(canvas) {
         }
 
         gl.bindBuffer(gl.ARRAY_BUFFER, text_buffer);
-        gl.drawArrays(gl.TRIANGLES, 6*8, 6);
+        gl.drawArrays(gl.TRIANGLES, 6*9, 6);
 
     };
 
