@@ -29,7 +29,39 @@ module.exports = React.createClass({
             this.props.inSize,
             0,
             function (image, boundaries, offset) {
-                var dField = null;
+                var dField = null,
+                    vertices = [],
+                    boundary = null,
+                    i = 0,
+                    v0 = [],
+                    v1 = [],
+                    v2 = [],
+                    v3 = [];
+
+                for (i = 0; i < boundaries.length; i += 1) {
+                    boundary = boundaries[i];
+                    v0[0] = boundary.xOffset + boundary.right - boundary.left;
+                    v0[1] = boundary.yOffset + boundary.top - boundary.bottom;
+
+                    v1[0] = boundary.xOffset;
+                    v1[1] = v0[1];
+
+                    v2[0] = v0[0];
+                    v2[1] = boundary.yOffset;
+
+                    v3[0] = v1[0];
+                    v3[1] = v2[1];
+
+                    vertices.push(v0[0], v0[1], 0, boundary.right, boundary.top);
+                    vertices.push(v1[0], v1[1], 0, boundary.left, boundary.top);
+                    vertices.push(v2[0], v2[1], 0, boundary.right, boundary.bottom);
+
+                    vertices.push(v1[0], v1[1], 0, boundary.left, boundary.top);
+                    vertices.push(v3[0], v3[1], 0, boundary.left, boundary.bottom);
+                    vertices.push(v2[0], v2[1], 0, boundary.right, boundary.bottom);
+
+                }
+
                 font_img.src = canvas.toDataURL();
 
                 if (self.props.distanceField) {
@@ -47,13 +79,11 @@ module.exports = React.createClass({
 
                         dfield_img.src = canvas.toDataURL();
 
+                        self.props.updateExample(font_img, dfield_img, vertices);
                     };
 
-                    // dField = distance_field.generateSignedDistanceField(image, self.props.outSize, self.props.spread - 1);
-                    // canvas.width = self.props.outSize;
-                    // canvas.height = self.props.outSize;
-                    // ctx.putImageData(dField, 0, 0);
-
+                } else {
+                    self.props.updateExample(font_img, dfield_img, vertices);
                 }
             }
         );
@@ -62,8 +92,15 @@ module.exports = React.createClass({
     componentDidMount: function () {
         this.drawFont();
     },
-    componentDidUpdate: function () {
-        this.drawFont();
+    componentDidUpdate: function (prevProps) {
+        if (!(this.props.fontData === prevProps.fontData &&
+                this.props.fontSize === prevProps.fontSize &&
+                this.props.spread === prevProps.spread &&
+                this.props.inSize === prevProps.inSize &&
+                this.props.outSize === prevProps.outSize &&
+                this.props.distanceField === prevProps.distanceField)) {
+            this.drawFont();
+        }
     },
     render: function () {
         return (

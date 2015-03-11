@@ -13,7 +13,17 @@ module.exports = React.createClass({
             inSize: null,
             outSize: null,
             distField: false,
+            fontImg: null,
+            dfieldImg: null,
+            vertices: null,
         };
+    },
+    updateExample: function (font_img, dfield_img, vertices) {
+        this.setState({
+            fontImg: font_img,
+            dfieldImg: dfield_img,
+            vertices: vertices,
+        });
     },
     generateFont: function (data, fontSize, spread, inSize, outSize, distField) {
         this.setState({
@@ -29,14 +39,14 @@ module.exports = React.createClass({
         var fontCanvas = null;
 
         if (this.state.fontData) {
-            console.log(this.state);
             fontCanvas = (
                 <FontCanvas fontData={this.state.fontData}
                     fontSize={this.state.fontSize}
                     spread={this.state.spread}
                     inSize={this.state.inSize}
                     outSize={this.state.outSize}
-                    distanceField={this.state.distField} />
+                    distanceField={this.state.distField}
+                    updateExample={this.updateExample} />
             );
 
         }
@@ -49,7 +59,10 @@ module.exports = React.createClass({
                     <FontControls generateFont={this.generateFont} />
                 </div>
                 <div className="col-md-6">
-                    <GLExample />
+                    <GLExample
+                        fontImg={this.state.fontImg}
+                        dfieldImg={this.state.dfieldImg}
+                        vertices={this.state.vertices} />
                 </div>
             </div>
         );

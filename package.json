@@ -6,6 +6,8 @@
         "opentype.js": "0.4.x",
         "jsx-loader": "0.12.x",
         "worker-loader": "0.5.x",
-        "react": "0.12.x"
+        "raw-loader": "0.5.x",
+        "react": "0.12.x",
+        "gl-matrix": "git://github.com/jacobgardner/gl-matrix.git#master"
     }
 }

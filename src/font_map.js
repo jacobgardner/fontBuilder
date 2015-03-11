@@ -37,13 +37,13 @@ function generateFontMap(ctx, fontData, fontSize, spread, imgSize, offset, callb
         }
 
         boundary = {
-            left: x,
-            right: x + (glyph.xMax - glyph.xMin) * scale + 2 * spread,
-            top: y,
-            bottom: y + (glyph.yMax  - glyph.yMin) * scale + spread * 2,
-            xOffset: glyph.xMin * scale,
-            yOffset: glyph.yMin * scale,
-            advanceWidth: glyph.advanceWidth * scale,
+            left: x / imgSize,
+            right: (x + (glyph.xMax - glyph.xMin) * scale + 2 * spread) / imgSize,
+            top: y / imgSize,
+            bottom: (y + (glyph.yMax  - glyph.yMin) * scale + spread * 2) / imgSize,
+            xOffset: (glyph.xMin * scale) / imgSize,
+            yOffset: (glyph.yMin * scale) / imgSize,
+            advanceWidth: (glyph.advanceWidth * scale) / imgSize,
         };
 
         boundaries.push(boundary);
