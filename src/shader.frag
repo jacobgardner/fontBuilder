@@ -45,7 +45,7 @@ void main(void) {
             alpha = 1.0;
         }
 
-        alpha = smoothstep(0.40, 0.60, mask);
+        alpha = smoothstep(0.48, 0.52, mask);
 
         color = vec4(1.0, 1.0, 1.0, alpha);
 

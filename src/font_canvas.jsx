@@ -52,13 +52,13 @@ module.exports = React.createClass({
                     v3[0] = v1[0];
                     v3[1] = v2[1];
 
-                    vertices.push(v0[0], v0[1], 0, boundary.right, boundary.top);
-                    vertices.push(v1[0], v1[1], 0, boundary.left, boundary.top);
-                    vertices.push(v2[0], v2[1], 0, boundary.right, boundary.bottom);
+                    vertices.push(v0[0], v0[1], 0, boundary.right, boundary.bottom);
+                    vertices.push(v1[0], v1[1], 0, boundary.left, boundary.bottom);
+                    vertices.push(v2[0], v2[1], 0, boundary.right, boundary.top);
 
-                    vertices.push(v1[0], v1[1], 0, boundary.left, boundary.top);
-                    vertices.push(v3[0], v3[1], 0, boundary.left, boundary.bottom);
-                    vertices.push(v2[0], v2[1], 0, boundary.right, boundary.bottom);
+                    vertices.push(v1[0], v1[1], 0, boundary.left, boundary.bottom);
+                    vertices.push(v3[0], v3[1], 0, boundary.left, boundary.top);
+                    vertices.push(v2[0], v2[1], 0, boundary.right, boundary.top);
 
                 }
 

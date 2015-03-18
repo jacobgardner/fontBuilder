@@ -13,7 +13,7 @@ function getImage(img, x, y) {
         }
     }
 
-    if (img.data[offset + 3] < 1) {
+    if (img.data[offset + 3] < 127) {
         return false;
     }
 
@@ -82,7 +82,7 @@ function generateSignedDistanceField(img, outSize, spread) {
         distance = 0,
         adjustedX = 0,
         adjustedY = 0,
-        spiral = build_spiral(outSpread);
+        spiral = build_spiral(spread);
 
     for (y = 0; y < outSize; y += 1) {
         for (x = 0; x < outSize; x += 1) {
@@ -90,7 +90,7 @@ function generateSignedDistanceField(img, outSize, spread) {
             adjustedY = (y * downscale) + downscale / 2;
 
             distance = findSignedDistance(img, adjustedX, adjustedY, spread, spiral);
-            setImage(outImage, x, y, distance, outSpread);
+            setImage(outImage, x, y, distance, spread);
         }
     }
 
